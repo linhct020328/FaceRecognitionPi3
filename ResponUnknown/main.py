@@ -1,5 +1,5 @@
 import cv2
-import Aes256CBC
+from Aes256CBC import *
 import paho.mqtt.client as paho
 from PIL import Image
 import ssl
@@ -24,7 +24,7 @@ pathClientKey = './certs_localhost/mqtt_client.key'
 unknown_video = cv2.VideoWriter(pathVideo, cv2.VideoWriter_fourcc(*'MP4V'), 20,
                                 frameSize)
 def convertAesToMsg(string, key, iv):
-    decoded= Aes256CBC.decrypt_aes_256(string, key, iv)
+    decoded= decrypt_aes_256(string, key, iv)
     return decoded
 
 def on_connect(client, userdata, flags, rc):
