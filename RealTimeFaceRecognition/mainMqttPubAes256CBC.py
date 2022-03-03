@@ -9,7 +9,7 @@ import cv2
 import time
 from time import strftime
 import ssl
-import Aes256CBC
+from Aes256CBC import *
 
 clientId = "mqtt-servo"
 topic = "testServo"
@@ -24,6 +24,12 @@ CMD_CLOSE = 'close'
 pathCa = './certs_localhost/mqtt_ca.crt'
 pathClient = './certs_localhost/mqtt_client.crt'
 pathClientKey = './certs_localhost/mqtt_client.key'
+
+client = paho.Client()
+client.tls_set(pathCa, pathClient, pathClientKey, tls_version=ssl.PROTOCOL_TLSv1_2)
+client.tls_insecure_set(True)
+client.connect(mqtt_broker, mqtt_port)
+client.username_pw_set(username=mqttUser, password=mqttPassword)
 
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read('trainer/trainer.yml')
@@ -61,12 +67,6 @@ while True:
     start_time = time.time()
     ret, frame = cam.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    client = paho.Client()
-    client.tls_set(pathCa, pathClient, pathClientKey, tls_version=ssl.PROTOCOL_TLSv1_2)
-    client.tls_insecure_set(True)
-    client.connect(mqtt_broker, mqtt_port)
-    client.username_pw_set(username=mqttUser,password= mqttPassword)
 
     faces = faceCascade.detectMultiScale(
         gray,
