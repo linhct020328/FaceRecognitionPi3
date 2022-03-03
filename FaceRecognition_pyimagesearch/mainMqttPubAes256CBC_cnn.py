@@ -6,7 +6,7 @@ import cv2
 import ssl
 
 import paho.mqtt.client as paho
-import Aes256CBC
+from Aes256CBC import *
 
 clientId = "mqtt-servo"
 topic = "testServo"
@@ -22,6 +22,12 @@ pathClientKey = './certs_localhost/mqtt_client.key'
 
 CMD_OPEN = 'open'
 CMD_CLOSE = 'close'
+
+client = paho.Client()
+client.tls_set(pathCa, pathClient, pathClientKey, tls_version=ssl.PROTOCOL_TLSv1_2)
+client.tls_insecure_set(True)
+client.connect(mqtt_broker, mqtt_port)
+client.username_pw_set(username=mqttUser, password=mqttPassword)
 
 cascadePath = "./cascades/haarcascade_frontalface_default.xml"
 path = "trainer/encodings_cnn.pickle"
@@ -55,12 +61,6 @@ def door_unlock(key, iv):
 
 while True:
 	start_time = time.time()
-
-	client = paho.Client()
-	client.tls_set(pathCa, pathClient, pathClientKey, tls_version=ssl.PROTOCOL_TLSv1_2)
-	client.tls_insecure_set(True)
-	client.connect(mqtt_broker, mqtt_port)
-	client.username_pw_set(username=mqttUser, password=mqttPassword)
 
 	ret, frame = cam.read()
 
