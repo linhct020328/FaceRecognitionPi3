@@ -1,0 +1,9 @@
+const double fzHeadLine = 26;
+const double fzSubHead = 20;
+const double fzTitle = 22;
+const double fzSubTitle = 18;
+const double fzButton = 16;
+const double fzCaption = 14;
+const double fzBody1 = 20;
+const double fzBody2 = 16;
+const double fzDisplay1 = 18;

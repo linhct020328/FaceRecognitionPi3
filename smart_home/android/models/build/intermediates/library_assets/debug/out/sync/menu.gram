@@ -1,0 +1,19 @@
+#JSGF V1.0;
+
+grammar menu;
+
+public <item> = (turn on the fan
+                    |turn off the fan
+                    |turn on fan's
+                    |turn off fan's
+                    |cancel
+                    |shutdown
+                    |turn off the light
+                    |turn off light's
+                    |turn off lighted
+                    |turn off lighter
+                    |turn on the light
+                    |turn on light's
+                    |turn on lighted
+                    |turn on lighter
+                    |what your name);
