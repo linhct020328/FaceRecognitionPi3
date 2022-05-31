@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:smarthome/get_it.dart';
 import 'package:smarthome/model/device.dart';
+import 'package:smarthome/provider/local/local_provider.dart';
 import 'package:smarthome/views/add_device/add_device_page.dart';
 import 'package:smarthome/views/control_device/control_device_page.dart';
+import 'package:smarthome/views/widgets/dialogs/loading_dialog.dart';
 
 class ListDevicePage extends StatefulWidget {
   const ListDevicePage({Key key, this.devices}) : super(key: key);
@@ -13,6 +18,44 @@ class ListDevicePage extends StatefulWidget {
 }
 
 class _ListDevicePageState extends State<ListDevicePage> {
+  List<Device> devices;
+
+  void _showDeleteDialog(Device device) {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              title: Text('Xóa thiết bị'),
+              content: Text('Bạn muốn xóa thiết bị này?'),
+              actions: [
+                ElevatedButton(
+                    onPressed: () => _deleteDevice(device), child: Text('Xóa')),
+                ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(primary: Colors.red),
+                    child: Text('Hủy')),
+              ],
+            ));
+  }
+
+  void _deleteDevice(Device device) async {
+    Navigator.pop(context);
+    LoadingDialog.show(context);
+
+    devices.remove(device);
+
+    final rawData = List<String>.generate(
+        devices.length, (index) => jsonEncode(devices[index].toJson()));
+    await locator<LocalProvider>().saveData(LocalKeys.devices, rawData);
+    LoadingDialog.hide(context);
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    devices = widget.devices;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +64,7 @@ class _ListDevicePageState extends State<ListDevicePage> {
       ),
       body: ListView.separated(
           itemBuilder: (context, index) {
-            final device = widget.devices[index];
+            final device = devices[index];
 
             return ListTile(
               onTap: () => Navigator.push(
@@ -30,19 +73,32 @@ class _ListDevicePageState extends State<ListDevicePage> {
                       builder: (_) => ControlDevicePage(
                             device: device,
                           ))),
-              title: Text('${device.mqttBroker}:${device.port}'),
+              title: Text(
+                '${device.mqttBroker}:${device.port}',
+              ),
+              trailing: IconButton(
+                icon: Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                ),
+                onPressed: () => _showDeleteDialog(device),
+              ),
             );
           },
           separatorBuilder: (_, __) => const Divider(),
-          itemCount: widget.devices.length),
+          itemCount: devices.length),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (_) => AddDevicePage(
-                      devices: widget.devices,
-                    ))),
+        onPressed: () async {
+          final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => AddDevicePage(
+                        devices: devices,
+                      )));
+          print('result: $result');
+          if (result != null) setState(() {});
+        },
       ),
     );
   }

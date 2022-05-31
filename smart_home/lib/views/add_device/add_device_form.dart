@@ -31,20 +31,22 @@ class _AddDeviceFormState extends State<AddDeviceForm> {
 
       final newDevices = widget.devices;
 
-      newDevices.insert(0, Device(
+      final device = Device(
         mqttBroker: _mqttBrokerCtrl.text.trim(),
-        port: _portCtrl.text.trim(),
+        port: int.parse(_portCtrl.text.trim()),
         clientID: _clientIDCtrl.text.trim(),
         userName: _userNameCtrl.text.trim(),
         password: _topicCtrl.text.trim(),
         topic: _topicCtrl.text.trim(),
-      ));
+      );
+      newDevices.insert(0, device);
 
       final rawData = List<String>.generate(newDevices.length,
           (index) => jsonEncode(newDevices[index].toJson()));
       await locator<LocalProvider>().saveData(LocalKeys.devices, rawData);
       _clear();
       LoadingDialog.hide(context);
+      Navigator.pop(context, device);
     }
   }
 

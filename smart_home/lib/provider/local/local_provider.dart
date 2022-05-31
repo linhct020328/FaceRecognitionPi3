@@ -60,7 +60,6 @@ class LocalProviderImpl implements LocalProvider {
 
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final rawData = preferences.getStringList(LocalKeys.devices);
-
     if (rawData != null) {
       rawData.forEach((element) {
         devices.add(Device.fromJson(jsonDecode(element)));

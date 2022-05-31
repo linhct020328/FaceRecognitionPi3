@@ -1,10 +1,16 @@
-class Device {
+import 'package:equatable/equatable.dart';
+
+class Device extends Equatable {
   String mqttBroker;
-  String port;
+  int port;
   String clientID;
   String userName;
   String password;
   String topic;
+
+  @override
+  List<Object> get props =>
+      [mqttBroker, port, clientID, userName, password, topic];
 
   Device(
       {this.mqttBroker,

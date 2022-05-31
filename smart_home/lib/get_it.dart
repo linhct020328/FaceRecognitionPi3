@@ -8,18 +8,12 @@ import 'package:smarthome/provider/remote/control_device_provider.dart';
 import 'package:smarthome/provider/voice_controller/voice_controller_provider.dart';
 import 'package:smarthome/repositories/authentication_repo.dart';
 import 'package:smarthome/repositories/control_device_repo.dart';
-import 'package:smarthome/views/control_device/bloc/control_device_bloc.dart';
 
 GetIt locator = GetIt.instance;
 
 void setupLocator() {
-//  locator.registerLazySingleton<MQTTService>(() => MQTTService());
-
   locator.registerLazySingleton(() => AppBloc());
-//  locator.registerLazySingleton(() => MQTTBloc());
-  locator.registerLazySingleton<ControlDeviceBloc>(
-      () => ControlDeviceBloc(locator()));
-//  locator.registerLazySingleton(() => UpdateDataBloc());
+
   locator.registerLazySingleton(() => VoskBloc(locator()));
 
   locator.registerFactory<AuthenticationRepo>(

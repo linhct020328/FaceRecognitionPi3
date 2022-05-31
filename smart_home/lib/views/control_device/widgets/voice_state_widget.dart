@@ -9,7 +9,6 @@ import 'package:smarthome/configs/constants/vosk_constants.dart';
 import 'package:smarthome/model/remote_model.dart';
 import 'package:smarthome/provider/voice_controller/voice_controller_provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:smarthome/views/control_device/bloc/control_device_bloc.dart';
 
 class MyPhoneListenerWidget extends StatelessWidget {
   @override
@@ -40,8 +39,8 @@ class _VoiceContentWidgetState extends State<VoiceContentWidget> {
   bool isEnable = false;
 
   void _remoteDevice(bool value) {
-    BlocProvider.of<ControlDeviceBloc>(context)
-        .add(RemoteDeviceEvent(RemoteModel("Light", value)));
+    // BlocProvider.of<ControlDeviceBloc>(context)
+    //     .add(RemoteDeviceEvent(RemoteModel("Light", value)));
   }
 
   @override
@@ -102,8 +101,8 @@ class _VoiceContentWidgetState extends State<VoiceContentWidget> {
     return Column(
       children: [
         SizedBox(
-          height: 200.w,
-          width: 200.w,
+          height: 150.w,
+          width: 150.w,
           child: FlareActor(FlareConstants.robotAssistant,
               alignment: Alignment.center,
               fit: BoxFit.contain,

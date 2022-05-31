@@ -45,6 +45,8 @@ dependencies:
   permission_handler: ^5.0.0+hotfix.9 # todo: config ios
   flare_flutter: ^2.0.6
   http: ^0.12.2
+  encrypt: ^4.1.0
+  flustars: ^0.3.3
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +66,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/certs_localhost/
+    - assets/certs_ubuntu/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

@@ -5,39 +5,110 @@ import 'package:loading/indicator/ball_pulse_indicator.dart';
 import 'package:loading/loading.dart';
 import 'package:smarthome/bloc/vosk_bloc/vosk_bloc.dart';
 import 'package:smarthome/model/device.dart';
+import 'package:smarthome/provider/mqtt/mqtt_service.dart';
 import 'package:smarthome/views/control_device/widgets/settings_dialog.dart';
 import 'package:smarthome/views/widgets/widgets/exit_dialog.dart';
-
-import '../../get_it.dart';
-import 'bloc/control_device_bloc.dart';
 import 'widgets/button_group_widget.dart';
 import 'widgets/voice_state_widget.dart';
 
-class ControlDevicePage extends StatelessWidget {
+class ControlDevicePage extends StatefulWidget {
   const ControlDevicePage({Key key, this.device}) : super(key: key);
 
   final Device device;
 
   @override
+  _ControlDevicePageState createState() => _ControlDevicePageState();
+}
+
+class _ControlDevicePageState extends State<ControlDevicePage> {
+  MQTTService manager;
+
+  bool _isLoading = true;
+  bool _isError = false;
+
+  Future _configureAndConnect() async {
+    try {
+      manager = MQTTService(
+          host: widget.device.mqttBroker,
+          port: widget.device.port,
+          topic: widget.device.topic,
+          username: widget.device.userName,
+          password: widget.device.password,
+          clientId: widget.device.clientID);
+      await manager.initMQTT();
+      await manager.connectMQTT();
+      setState(() {
+        _isLoading = false;
+        _isError = false;
+      });
+    } catch (e) {
+      print(e);
+      setState(() {
+        _isLoading = false;
+        _isError = true;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _configureAndConnect();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return _loading();
+    }
+
+    if (_isError) {
+      return _error();
+    }
+
     return MultiBlocProvider(
         providers: [
           BlocProvider<VoskBloc>.value(
               value: BlocProvider.of<VoskBloc>(context)..add(StartVoskEvent())),
-          BlocProvider(
-            create: (_) => locator<ControlDeviceBloc>(),
-          )
         ],
         child: _ControlDevicePage(
-          device: device,
+          device: widget.device,
+          mqttService:  manager,
         ));
+  }
+
+  Widget _loading() {
+    return Scaffold(
+      appBar: AppBar(
+          title:
+              Text('MQTT: ${widget.device.mqttBroker}:${widget.device.port}')),
+      body: SafeArea(
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    );
+  }
+
+  Widget _error() {
+    return Scaffold(
+      appBar: AppBar(
+          title:
+              Text('MQTT: ${widget.device.mqttBroker}:${widget.device.port}')),
+      body: SafeArea(
+        child: Center(
+          child: Text('Đã xảy ra lỗi'),
+        ),
+      ),
+    );
   }
 }
 
 class _ControlDevicePage extends StatelessWidget {
-  _ControlDevicePage({Key key, this.device}) : super(key: key);
+  _ControlDevicePage({Key key, this.device, this.mqttService}) : super(key: key);
 
   final Device device;
+  final MQTTService mqttService;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -56,15 +127,19 @@ class _ControlDevicePage extends StatelessWidget {
                 onPressed: () => showModalBottomSheet(
                     context: context,
                     builder: (_) => Container(
-                      padding: EdgeInsets.all(8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(title: Text('Điều khiển'),),
-                          ListTile(title: Text('Hình ảnh chưa xác định'),),
-                        ],
-                      ),
-                    )),
+                          padding: EdgeInsets.all(8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                title: Text('Điều khiển'),
+                              ),
+                              ListTile(
+                                title: Text('Hình ảnh chưa xác định'),
+                              ),
+                            ],
+                          ),
+                        )),
               )
             ],
           ),
@@ -74,34 +149,16 @@ class _ControlDevicePage extends StatelessWidget {
   }
 
   Widget _bodyWidget(BuildContext context) {
-    final sc = MediaQuery.of(context).size;
-
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(32.0),
         child: Stack(
           children: [
-            // Align(
-            //   alignment: Alignment.topLeft,
-            //   child: IconButton(
-            //     icon: Icon(
-            //       Icons.settings,
-            //       size: 36,
-            //       color: Colors.black,
-            //     ),
-            //     onPressed: () => _settings(context),
-            //   ),
-            // ),
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(height: sc.height / 2, child: MyPhoneListenerWidget()),
-                SizedBox(
-                    height: ScreenUtil().setHeight(250),
-                    child: ButtonGroupWidget()),
-                SizedBox(
-                  height: ScreenUtil().setHeight(52),
-                ),
+                // MyPhoneListenerWidget(),
+                ButtonGroupWidget(mqttService),
               ],
             ),
           ],

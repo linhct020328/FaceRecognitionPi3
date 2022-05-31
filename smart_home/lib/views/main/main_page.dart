@@ -20,6 +20,7 @@ class _MainPageState extends State<MainPage> {
         future: locator<LocalProvider>().getDevices(),
         builder: (BuildContext context, AsyncSnapshot<List<Device>> snapshot) {
           if (snapshot.hasData) {
+
             return ListDevicePage(
               devices: snapshot.data,
             );
