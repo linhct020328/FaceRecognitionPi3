@@ -36,7 +36,7 @@ class _AddDeviceFormState extends State<AddDeviceForm> {
         port: int.parse(_portCtrl.text.trim()),
         clientID: _clientIDCtrl.text.trim(),
         userName: _userNameCtrl.text.trim(),
-        password: _topicCtrl.text.trim(),
+        password: _passwordCtrl.text.trim(),
         topic: _topicCtrl.text.trim(),
       );
       newDevices.insert(0, device);

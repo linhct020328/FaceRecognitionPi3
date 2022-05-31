@@ -26,7 +26,7 @@ class _ButtonGroupWidgetState extends State<ButtonGroupWidget> {
         children: [
           GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onTap: () => _remote('close'),
+            onTap: () => _remote('open'),
             child: CircleAvatar(
               backgroundColor: _isOn ? primary : Colors.grey,
               radius: 40,
@@ -39,7 +39,7 @@ class _ButtonGroupWidgetState extends State<ButtonGroupWidget> {
           ),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onTap: () => _remote('open'),
+            onTap: () => _remote('close'),
             child: CircleAvatar(
               backgroundColor: _isOn ? Colors.red : Colors.grey,
               radius: 40,

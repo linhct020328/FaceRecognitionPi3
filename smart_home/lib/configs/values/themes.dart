@@ -14,8 +14,14 @@ class AppTheme {
       focusColor: primary,
       cursorColor: secondary,
       primaryTextTheme: TextTheme(
-        title: TextStyle(color: colorTextWhite, fontWeight: FontWeight.bold),
-        headline: TextStyle(color: colorTextWhite, fontWeight: FontWeight.bold),
+        title: TextStyle(
+            color: colorTextWhite,
+            fontWeight: FontWeight.bold
+        ),
+        headline: TextStyle(
+            color: colorTextWhite,
+            fontWeight: FontWeight.bold
+        ),
         subhead: TextStyle(
           color: colorTextBlack,
         ),
