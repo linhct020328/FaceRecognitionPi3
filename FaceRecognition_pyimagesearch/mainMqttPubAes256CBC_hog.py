@@ -97,7 +97,8 @@ while True:
 
 		else:
 			door_lock(key, iv)
-			imgByte = frame.tobytes()
+			_, img_encode = cv2.imencode('.jpg', frame)
+			imgByte = img_encode.tobytes()
 			img = imgByte.hex()
 			imgSend = convertMsgToAes(img, key, iv)
 			client.publish(topic, imgSend)
