@@ -33,7 +33,8 @@ class MQTTService {
 
   Future initMQTT() async {
     print('host: $host --- clientId: $clientId -- port: $port');
-    _client = MqttServerClient.withPort(host, clientId, port); //'$clientId${Random().nextInt(99)}'
+    _client = MqttServerClient.withPort(
+        host, clientId, port); //'$clientId${Random().nextInt(99)}'
     // _client = MqttServerClient.withPort(host, '$clientId${Random().nextInt(99)}', port);
     _client.keepAlivePeriod = _keepAlivePeriod;
     _client.onDisconnected = _onDisconnected;
@@ -48,6 +49,7 @@ class MQTTService {
 
     final context = SecurityContext.defaultContext;
 
+// <<<<<<< HEAD
     if(host == '192.168.0.103'){
       String clientAuth = await rootBundle.loadString("assets/certs_localhost/mqtt_ca.crt");
       context.setTrustedCertificatesBytes(clientAuth.codeUnits); // context.setClientAuthoritiesBytes(clientAuth.codeUnits);
@@ -69,12 +71,27 @@ class MQTTService {
       context.usePrivateKeyBytes(privateKey.codeUnits);
     }
 
+// =======
+//     String clientAuth =
+//         await rootBundle.loadString("assets/certs_ubuntu/mqtt_ca.crt");
+//     context.setTrustedCertificatesBytes(clientAuth
+//         .codeUnits); // context.setClientAuthoritiesBytes(clientAuth.codeUnits);
+//
+//     String trustedCer =
+//         await rootBundle.loadString("assets/certs_ubuntu/mqtt_client.crt");
+//     context.useCertificateChainBytes(trustedCer.codeUnits);
+//
+//     String privateKey =
+//         await rootBundle.loadString("assets/certs_ubuntu/mqtt_client.key");
+//     context.usePrivateKeyBytes(privateKey.codeUnits);
+// >>>>>>> b18dcc9f69104a527809833b76aa36373a8fee3f
 
     final MqttConnectMessage connMess = MqttConnectMessage()
         .authenticateAs(username, password)
-    // .withClientIdentifier(clientId)
-    //     .keepAliveFor(20) // Must agree with the keep alive set above or not set
-        .withWillTopic('will topic') // If you set this you must set a will message
+        // .withClientIdentifier(clientId)
+        //     .keepAliveFor(20) // Must agree with the keep alive set above or not set
+        .withWillTopic(
+            'will topic') // If you set this you must set a will message
         .withWillMessage('Test message')
         .startClean() // Non persistent session for testing
         .withWillQos(MqttQos.atMostOnce);
@@ -86,13 +103,17 @@ class MQTTService {
     assert(_client != null);
     try {
       await _client.connect();
+      _client.subscribe(topic, MqttQos.atMostOnce);
     } on Exception catch (e) {
       _client.disconnect();
       throw Exception('Client MQTT exception - $e');
     }
   }
 
-  disconnectMQTT() => _client.disconnect();
+  disconnectMQTT() {
+    _client.unsubscribe(topic);
+    _client.disconnect();
+  }
 
   sendMessage(String message) {
     try {

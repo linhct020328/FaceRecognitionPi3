@@ -6,19 +6,23 @@ import 'package:smarthome/bloc/vosk_bloc/vosk_bloc.dart';
 import 'package:smarthome/configs/constants/control_remote_constants.dart';
 import 'package:smarthome/configs/constants/flare_constants.dart';
 import 'package:smarthome/configs/constants/vosk_constants.dart';
-import 'package:smarthome/model/remote_model.dart';
+import 'package:smarthome/provider/mqtt/mqtt_service.dart';
 import 'package:smarthome/provider/voice_controller/voice_controller_provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MyPhoneListenerWidget extends StatelessWidget {
+  final MQTTService mqttService;
+
+  MyPhoneListenerWidget(this.mqttService);
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<VoskBloc, VoskState>(
       builder: (context, state) {
         if (state is VoskInited) {
-          return VoiceContentWidget(true);
+          return VoiceContentWidget(true, mqttService);
         }
-        return VoiceContentWidget(false);
+        return VoiceContentWidget(false, mqttService);
       },
     );
   }
@@ -26,21 +30,21 @@ class MyPhoneListenerWidget extends StatelessWidget {
 
 class VoiceContentWidget extends StatefulWidget {
   final bool isEnable;
+  final MQTTService mqttService;
 
-  VoiceContentWidget(this.isEnable);
+  VoiceContentWidget(this.isEnable, this.mqttService);
 
   @override
   _VoiceContentWidgetState createState() => _VoiceContentWidgetState();
 }
 
 class _VoiceContentWidgetState extends State<VoiceContentWidget> {
-  String text = "Say 'Ok Sunday'";
+  String text = "Nói 'Ok Sunday'";
   String keyFlare = FlareConstants.keyStand;
   bool isEnable = false;
 
-  void _remoteDevice(bool value) {
-    // BlocProvider.of<ControlDeviceBloc>(context)
-    //     .add(RemoteDeviceEvent(RemoteModel("Light", value)));
+  void _remoteDevice(String command) {
+    widget.mqttService.sendMessage(command);
   }
 
   @override
@@ -53,30 +57,30 @@ class _VoiceContentWidgetState extends State<VoiceContentWidget> {
       print(data);
       if (data.toString().contains("WAKEUP")) {
         setState(() {
-          text = "Listening...";
+          text = "Đang nghe...";
           keyFlare = FlareConstants.keyThink;
         });
       } else if (data.toString().contains("LISTENING")) {
         setState(() {
-          text = "Say '${VoskConstants.wakeup}'";
+          text = "Nói '${VoskConstants.wakeup}'";
           keyFlare = FlareConstants.keyStand;
         });
       } else {
         final action = data.toString();
         setState(() {
           // Xét điều  khiển
-          if (action.contains(VoskConstants.turnOn)) {
-            _remoteDevice(ControlRemoteConstants.turnOn);
-            text = VoskConstants.turnOn;
-          } else if (action.contains(VoskConstants.turnOff)) {
-            _remoteDevice(ControlRemoteConstants.turnOff);
-            text = VoskConstants.turnOff;
+          if (action.contains(VoskConstants.open)) {
+            _remoteDevice(ControlRemoteConstants.open);
+            text = VoskConstants.open;
+          } else if (action.contains(VoskConstants.close)) {
+            _remoteDevice(ControlRemoteConstants.close);
+            text = VoskConstants.close;
           } else {
             //Hủy bỏ hành động
             if (action.contains(VoskConstants.cancel)) {
-              text = "Cancel action";
+              text = "Hủy hành động";
             } else {
-              text = "Don't understand";
+              text = "Tôi không hiểu";
             }
           }
           keyFlare = FlareConstants.keyOkay;
@@ -84,15 +88,13 @@ class _VoiceContentWidgetState extends State<VoiceContentWidget> {
       }
     }).onError((err) {
       setState(() {
-        text = "Voice recognition is not available";
+        text = "Nhận diện giọng nói đã tắt";
       });
     });
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
-
     super.dispose();
   }
 
@@ -134,7 +136,7 @@ class _VoiceContentWidgetState extends State<VoiceContentWidget> {
         Visibility(
           visible: !widget.isEnable,
           child: Text(
-            'Voice recognition is not available',
+            'Nhận diện giọng nói đã tắt',
             style: Theme.of(context)
                 .primaryTextTheme
                 .caption
