@@ -35,8 +35,8 @@ class _ControlDevicePageState extends State<ControlDevicePage> {
           username: widget.device.userName,
           password: widget.device.password,
           clientId: widget.device.clientID);
-       manager.initMQTT();
-       manager.connectMQTT();
+      manager.initMQTT();
+      manager.connectMQTT();
       setState(() {
         _isLoading = false;
         _isError = false;
