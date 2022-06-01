@@ -49,18 +49,42 @@ class MQTTService {
 
     final context = SecurityContext.defaultContext;
 
-    String clientAuth =
-        await rootBundle.loadString("assets/certs_ubuntu/mqtt_ca.crt");
-    context.setTrustedCertificatesBytes(clientAuth
-        .codeUnits); // context.setClientAuthoritiesBytes(clientAuth.codeUnits);
+// <<<<<<< HEAD
+    if(host == '192.168.0.103'){
+      String clientAuth = await rootBundle.loadString("assets/certs_localhost/mqtt_ca.crt");
+      context.setTrustedCertificatesBytes(clientAuth.codeUnits); // context.setClientAuthoritiesBytes(clientAuth.codeUnits);
 
-    String trustedCer =
-        await rootBundle.loadString("assets/certs_ubuntu/mqtt_client.crt");
-    context.useCertificateChainBytes(trustedCer.codeUnits);
+      String trustedCer = await rootBundle.loadString("assets/certs_localhost/mqtt_client.crt");
+      context.useCertificateChainBytes(trustedCer.codeUnits);
 
-    String privateKey =
-        await rootBundle.loadString("assets/certs_ubuntu/mqtt_client.key");
-    context.usePrivateKeyBytes(privateKey.codeUnits);
+      String privateKey = await rootBundle.loadString("assets/certs_localhost/mqtt_client.key");
+      context.usePrivateKeyBytes(privateKey.codeUnits);
+    }
+    else if (host == '192.168.227.129'){
+      String clientAuth = await rootBundle.loadString("assets/certs_ubuntu/mqtt_ca.crt");
+      context.setTrustedCertificatesBytes(clientAuth.codeUnits); // context.setClientAuthoritiesBytes(clientAuth.codeUnits);
+
+      String trustedCer = await rootBundle.loadString("assets/certs_ubuntu/mqtt_client.crt");
+      context.useCertificateChainBytes(trustedCer.codeUnits);
+
+      String privateKey = await rootBundle.loadString("assets/certs_ubuntu/mqtt_client.key");
+      context.usePrivateKeyBytes(privateKey.codeUnits);
+    }
+
+// =======
+//     String clientAuth =
+//         await rootBundle.loadString("assets/certs_ubuntu/mqtt_ca.crt");
+//     context.setTrustedCertificatesBytes(clientAuth
+//         .codeUnits); // context.setClientAuthoritiesBytes(clientAuth.codeUnits);
+//
+//     String trustedCer =
+//         await rootBundle.loadString("assets/certs_ubuntu/mqtt_client.crt");
+//     context.useCertificateChainBytes(trustedCer.codeUnits);
+//
+//     String privateKey =
+//         await rootBundle.loadString("assets/certs_ubuntu/mqtt_client.key");
+//     context.usePrivateKeyBytes(privateKey.codeUnits);
+// >>>>>>> b18dcc9f69104a527809833b76aa36373a8fee3f
 
     final MqttConnectMessage connMess = MqttConnectMessage()
         .authenticateAs(username, password)
