@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:smarthome/provider/helpers/crypt.dart';
+import 'package:smarthome/provider/helpers/hex2byte.dart';
 
 class Utils{
-  static Image imageFromBase64String(String base64String) {
-    // final UriData data = Uri.parse(base64String).data;
-    return Image.memory(base64Decode(base64String),
+  static Image imageFromAesString(String aesString) {
+    final imgHex = crypt.aesDecrypt(aesString);
+    final imgByte = ByteUtils.hexToBytes(imgHex);
+    return Image.memory(imgByte,
       width: double.infinity,
       height: double.infinity,
       alignment: Alignment.center,
