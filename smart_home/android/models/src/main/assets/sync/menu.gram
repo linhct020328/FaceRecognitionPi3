@@ -2,6 +2,6 @@
 
 grammar menu;
 
-public <item> = (turn on
-                    |turn off
+public <item> = (open
+                    |close
                     |cancel);

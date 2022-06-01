@@ -1,4 +1,4 @@
 class ControlRemoteConstants {
-  static const bool turnOn= true;
-  static const bool turnOff= false;
+  static const String open = 'open';
+  static const String close = 'close';
 }
