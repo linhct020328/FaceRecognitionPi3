@@ -122,6 +122,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (strcmp((char*)decdata.c_str(),CMD_OPEN) == 0 && directionState == 0) {
     directionState = 1;
     openDoor();
+    delay(30000);//30giay
+    directionState = 0;   
+    closeDoor();
   } 
   else if (strcmp((char*)decdata.c_str(),CMD_CLOSE) == 0 && directionState == 1) {
     directionState = 0;   

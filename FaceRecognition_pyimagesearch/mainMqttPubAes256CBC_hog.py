@@ -96,7 +96,7 @@ while True:
 			name = max(counts, key=counts.get)
 
 		else:
-			door_lock(key, iv)
+			#door_lock(key, iv)
 			_, img_encode = cv2.imencode('.jpg', frame)
 			imgByte = img_encode.tobytes()
 			img = imgByte.hex()
