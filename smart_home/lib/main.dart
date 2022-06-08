@@ -1,3 +1,4 @@
+import 'package:permission_handler/permission_handler.dart';
 import 'package:smarthome/app.dart';
 import 'package:smarthome/bloc/app_bloc/bloc.dart';
 import 'package:smarthome/bloc_delegate.dart';
@@ -7,10 +8,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'get_it.dart';
 import 'dart:io';
 
-void main() {
-  setupLocator();
-  HttpOverrides.global = MyHttpOverrides();
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  await setupLocator();
+  HttpOverrides.global = MyHttpOverrides();
+
+  await Permission.storage.request();
 
   // set color status bar and navigationbar
   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);

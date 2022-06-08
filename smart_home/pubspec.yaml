@@ -50,6 +50,9 @@ dependencies:
   flustars: ^0.3.3 #^2.0.1 #
   typed_data: ^1.1.6
   photo_view: ^0.14.0
+  flutter_local_notifications: ^1.4.4+5 # config iOS
+  path_provider: 2.0.9
+
 
 
 dev_dependencies:

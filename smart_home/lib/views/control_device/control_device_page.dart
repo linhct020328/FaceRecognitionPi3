@@ -1,13 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:loading/indicator/ball_pulse_indicator.dart';
 import 'package:loading/loading.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:smarthome/bloc/vosk_bloc/vosk_bloc.dart';
 import 'package:smarthome/configs/utils.dart';
+import 'package:smarthome/get_it.dart';
 import 'package:smarthome/model/device.dart';
 import 'package:smarthome/provider/helpers/crypt.dart';
+import 'package:smarthome/provider/helpers/local_notify/local_notify_helper.dart';
+import 'package:smarthome/provider/helpers/local_notify/receive_notification_entity.dart';
 import 'package:smarthome/provider/mqtt/mqtt_service.dart';
 import 'package:smarthome/views/control_device/widgets/settings_dialog.dart';
 import 'package:smarthome/views/photo_view/photo_view_page.dart';
@@ -79,8 +85,7 @@ class _ControlDevicePageState extends State<ControlDevicePage> {
     return MultiBlocProvider(
         providers: [
           BlocProvider<VoskBloc>.value(
-              value: BlocProvider.of<VoskBloc>(context)
-                ..add(StartVoskEvent())),
+              value: BlocProvider.of<VoskBloc>(context)..add(StartVoskEvent())),
         ],
         child: _ControlDevicePage(
           device: widget.device,
@@ -92,7 +97,7 @@ class _ControlDevicePageState extends State<ControlDevicePage> {
     return Scaffold(
       appBar: AppBar(
           title:
-          Text('MQTT: ${widget.device.mqttBroker}:${widget.device.port}')),
+              Text('MQTT: ${widget.device.mqttBroker}:${widget.device.port}')),
       body: SafeArea(
         child: Center(
           child: CircularProgressIndicator(),
@@ -105,7 +110,7 @@ class _ControlDevicePageState extends State<ControlDevicePage> {
     return Scaffold(
       appBar: AppBar(
           title:
-          Text('MQTT: ${widget.device.mqttBroker}:${widget.device.port}')),
+              Text('MQTT: ${widget.device.mqttBroker}:${widget.device.port}')),
       body: SafeArea(
         child: Center(
           child: Text('Đã xảy ra lỗi'),
@@ -135,19 +140,20 @@ class __ControlDevicePageState extends State<_ControlDevicePage> {
   void initState() {
     super.initState();
     widget.mqttService.client.updates
-        ?.listen((List<MqttReceivedMessage<MqttMessage>> c) {
+        ?.listen((List<MqttReceivedMessage<MqttMessage>> c) async{
       final MqttPublishMessage recMess = c[0].payload as MqttPublishMessage;
 
       final topic = c[0].topic;
       final payload =
-      MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
       debugPrint(
           '>>> Change notification - topic: <$topic>, payload: <-- $payload -->');
 
       if (topic == widget.device.topic && payload.length > 24) {
         final base64 = crypt.aesDecrypt(payload);
-        final img = Utils.imageFromBase64String(base64);
+        final img = await Utils.saveImageToStorage(base64);
+        _showNotify();
         setState(() {
           _image = img;
         });
@@ -155,66 +161,77 @@ class __ControlDevicePageState extends State<_ControlDevicePage> {
     });
   }
 
+  void _showNotify() {
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+        AndroidNotificationDetails('channel-id', 'channel name', 'channel',
+            importance: Importance.Max,
+            priority: Priority.Max,
+            ticker: 'ticker'),
+        IOSNotificationDetails());
+
+    locator<LocalNotifyHelper>().showNotification(
+        ReceiveNotificationEntity(title: 'Cảnh báo', body: 'Nhận diện người lạ'),
+        platformChannelSpecifics);
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () =>
-          showDialog<bool>(
-            context: context,
-            builder: (c) => ExitAlertDialog(),
-          ),
+      onWillPop: () => showDialog<bool>(
+        context: context,
+        builder: (c) => ExitAlertDialog(),
+      ),
       child: Scaffold(
           appBar: AppBar(
             title:
-            Text('MQTT: ${widget.device.mqttBroker}:${widget.device.port}'),
+                Text('MQTT: ${widget.device.mqttBroker}:${widget.device.port}'),
             actions: [
               IconButton(
                 icon: Icon(Icons.settings),
-                onPressed: () =>
-                    showModalBottomSheet(
-                        context: context,
-                        builder: (_) =>
-                            Container(
-                              padding: EdgeInsets.all(8),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ListTile(
-                                    title: Text('Điều khiển giọng nói'),
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      _settings(context);
-                                    },
-                                  ),
-                                  ListTile(
-                                    title: Text('Hình ảnh đã nhận diện'),
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      if (_image == null) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                            SnackBar(
-                                              content: Text('Chưa có dữ liệu!',
-                                                style: TextStyle(
-                                                    color: Colors.white),),
-                                              backgroundColor: Colors.red,));
-                                        return;
-                                      }
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              PhotoViewRouteWrapper(
-                                                  imageProvider: _image.image
-                                                // tag: tagImage,
-                                              ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
+                onPressed: () => showModalBottomSheet(
+                    context: context,
+                    builder: (_) => Container(
+                          padding: EdgeInsets.all(8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                title: Text('Điều khiển giọng nói'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _settings(context);
+                                },
                               ),
-                            )),
+                              ListTile(
+                                title: Text('Hình ảnh đã nhận diện'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  if (_image == null) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content: Text(
+                                        'Chưa có dữ liệu!',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ));
+                                    return;
+                                  }
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PhotoViewRouteWrapper(
+                                              imageProvider: _image.image
+                                              // tag: tagImage,
+                                              ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        )),
               )
             ],
           ),
@@ -242,7 +259,9 @@ class __ControlDevicePageState extends State<_ControlDevicePage> {
     );
   }
 
-  void _settings(BuildContext context,) {
+  void _settings(
+    BuildContext context,
+  ) {
     showDialog(
         context: context,
         builder: (context) =>
