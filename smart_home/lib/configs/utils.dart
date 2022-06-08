@@ -6,11 +6,12 @@ import 'package:smarthome/provider/helpers/crypt.dart';
 
 class Utils {
   static Future<Image> saveImageToStorage(String aesString) async {
+    final now = DateTime.now();
     final imgHex = crypt.aesDecrypt(aesString);
     final imgByte = ByteUtils.hexToBytes(imgHex);
 
     final file = File.fromRawPath(imgByte);
-    await file.copy('${getDownloadPath()}/image1.png');
+    await file.copy('${getDownloadPath()}/image-${now.toIso8601String()}.png');
 
     return Image.file(file);
   }
