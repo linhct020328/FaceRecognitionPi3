@@ -151,9 +151,8 @@ class __ControlDevicePageState extends State<_ControlDevicePage> {
           '>>> Change notification - topic: <$topic>, payload: <-- $payload -->');
 
       if (topic == widget.device.topic && payload.length > 24) {
-        final base64 = crypt.aesDecrypt(payload);
-        final img = await Utils.saveImageToStorage(base64);
         _showNotify();
+        final img = await Utils.saveImageToStorage(payload);
         setState(() {
           _image = img;
         });

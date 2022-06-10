@@ -120,13 +120,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.5.0"
-  downloads_path_provider:
-    dependency: "direct main"
-    description:
-      name: downloads_path_provider
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.0"
   encrypt:
     dependency: "direct main"
     description:
@@ -360,7 +353,7 @@ packages:
     source: hosted
     version: "0.1.4"
   path_provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider
       url: "https://pub.dartlang.org"

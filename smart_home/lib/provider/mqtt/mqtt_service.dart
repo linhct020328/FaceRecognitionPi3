@@ -48,7 +48,7 @@ class MQTTService {
     _client.pongCallback = _pong;
 
     final context = SecurityContext.defaultContext;
-    if(host == '192.168.227.129'){
+    if(host == '192.168.227.130'){
       String clientAuth =
       await rootBundle.loadString("assets/certs_ubuntu/mqtt_ca.crt");
       context.setTrustedCertificatesBytes(clientAuth

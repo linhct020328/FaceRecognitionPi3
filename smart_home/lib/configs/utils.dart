@@ -10,10 +10,10 @@ class Utils {
     final imgHex = crypt.aesDecrypt(aesString);
     final imgByte = ByteUtils.hexToBytes(imgHex);
 
-    final file = File.fromRawPath(imgByte);
-    await file.copy('${getDownloadPath()}/image-${now.toIso8601String()}.png');
-
-    return Image.file(file);
+    final downloadPath = await getDownloadPath();
+    File pathFile = File('$downloadPath/image-${now.toIso8601String()}.jpg');
+    final ImgSave =  await pathFile.writeAsBytes(imgByte);
+    return Image.file(ImgSave);
   }
 
   static Future<String> getDownloadPath() async {
